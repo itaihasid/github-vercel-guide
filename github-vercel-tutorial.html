@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub + Vercel — Beginner's Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0a0f;--surface:#12121a;--card:#1a1a28;--border:#2a2a40;
+    --accent:#6c63ff;--accent2:#00d4aa;--accent3:#ff6b6b;
+    --text:#e8e8f0;--muted:#8888a8;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  .hero{background:linear-gradient(135deg,#0a0a0f 0%,#12102a 50%,#0a0a0f 100%);padding:60px 24px 48px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(108,99,255,0.15) 0%,transparent 70%);top:-200px;left:50%;transform:translateX(-50%);pointer-events:none}
+  .hero-tag{display:inline-block;background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.4);color:var(--accent);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:24px}
+  .hero h1{font-family:'Syne',sans-serif;font-size:clamp(28px,5vw,52px);font-weight:800;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,#fff 0%,#a8a8d0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero p{color:var(--muted);font-size:16px;font-weight:300;max-width:500px;margin:0 auto 32px;line-height:1.7}
+  .hero-badges{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .badge{background:var(--card);border:1px solid var(--border);padding:8px 16px;border-radius:8px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .dot{width:8px;height:8px;border-radius:50%}
+  .dot-green{background:var(--accent2);box-shadow:0 0 6px var(--accent2)}
+  .dot-purple{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+  .dot-red{background:var(--accent3);box-shadow:0 0 6px var(--accent3)}
+  .nav-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 12px;display:flex;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:100}
+  .nav-bar::-webkit-scrollbar{display:none}
+  .nav-btn{background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;padding:15px 12px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s}
+  .nav-btn:hover{color:var(--text)}
+  .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .progress-bar{background:var(--card);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+  .progress-track{flex:1;height:3px;background:var(--border);border-radius:10px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:10px;transition:width 0.4s ease}
+  .content{max-width:760px;margin:0 auto;padding:48px 24px}
+  .section{display:none}
+  .section.active{display:block;animation:fadeIn 0.3s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .section-header{margin-bottom:36px}
+  .section-num{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .section-header h2{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:10px;color:#fff}
+  .section-header p{color:var(--muted);font-size:15px;line-height:1.7;font-weight:300}
+  .analogy{background:linear-gradient(135deg,rgba(108,99,255,0.08),rgba(0,212,170,0.08));border:1px solid rgba(108,99,255,0.25);border-radius:14px;padding:24px;margin-bottom:28px;position:relative}
+  .analogy::before{content:'💡';position:absolute;top:-12px;left:20px;font-size:20px;background:var(--bg);padding:0 8px}
+  .analogy h4{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .analogy p{font-size:14px;line-height:1.7;color:var(--text);font-weight:300}
+  .step{display:flex;gap:20px;margin-bottom:32px;align-items:flex-start}
+  .step-num{width:40px;height:40px;min-width:40px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;box-shadow:0 4px 16px rgba(108,99,255,0.35)}
+  .step-num.green{background:var(--accent2);box-shadow:0 4px 16px rgba(0,212,170,0.35)}
+  .step-num.red{background:var(--accent3);box-shadow:0 4px 16px rgba(255,107,107,0.35)}
+  .step-num.emoji{background:var(--card);box-shadow:none;font-size:20px;border:1px solid var(--border)}
+  .step-body h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:8px;color:#fff}
+  .step-body p{font-size:14px;line-height:1.7;color:var(--muted);font-weight:300;margin-bottom:8px}
+  .visual-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin:12px 0;font-size:13px;line-height:1.9;color:var(--muted);font-family:'Courier New',monospace;position:relative}
+  .visual-box.prose{font-family:'DM Sans',sans-serif}
+  .visual-box .label{position:absolute;top:-10px;left:16px;background:var(--border);color:var(--muted);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:2px 10px;border-radius:100px;font-family:'DM Sans',sans-serif}
+  .label-bad{background:rgba(255,107,107,0.2)!important;color:var(--accent3)!important}
+  .label-good{background:rgba(0,212,170,0.1)!important;color:var(--accent2)!important}
+  .hl{color:var(--accent2);font-weight:500}
+  .hl-p{color:var(--accent)}
+  .hl-r{color:var(--accent3)}
+  .callout{border-left:3px solid var(--accent2);background:rgba(0,212,170,0.06);padding:16px 20px;border-radius:0 10px 10px 0;margin:16px 0;font-size:14px;color:var(--text);font-weight:300;line-height:1.7}
+  .callout.warn{border-left-color:#f59e0b;background:rgba(245,158,11,0.06)}
+  .callout strong{font-weight:600;color:#fff}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:20px 0}
+  .flow-node{background:var(--card);border:1px solid var(--border);padding:9px 14px;border-radius:10px;font-size:12px;font-weight:500;color:var(--text);text-align:center}
+  .flow-node.accent{border-color:var(--accent);color:var(--accent)}
+  .flow-node.green{border-color:var(--accent2);color:var(--accent2)}
+  .flow-arr{color:var(--muted);font-size:18px}
+  .card-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}
+  @media(max-width:520px){.card-grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+  .card h4{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px;color:#fff}
+  .card p{font-size:13px;color:var(--muted);line-height:1.6;font-weight:300}
+  .fork-ui{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:20px 0}
+  .fork-ui-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+  .fork-ui-body{padding:16px;font-size:13px;line-height:1.8;color:var(--muted)}
+  .fork-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+  .fork-row:last-child{border-bottom:none}
+  .mock-btn{background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);color:var(--accent);font-size:13px;font-weight:600;padding:8px 20px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;display:inline-block;margin-top:8px}
+  .mock-btn:hover{background:rgba(108,99,255,0.3)}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+  @media(max-width:520px){.compare{grid-template-columns:1fr}}
+  .finish-box{text-align:center;margin-top:32px;padding:32px;background:var(--card);border:1px solid var(--border);border-radius:16px}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">Complete Guide</div>
+  <h1>GitHub + Vercel<br>for Non-Developers</h1>
+  <p>Build it. Save it. Share it. Without touching a server — ever.</p>
+  <div class="hero-badges">
+    <div class="badge"><span class="dot dot-purple"></span> 100% Free to start</div>
+    <div class="badge"><span class="dot dot-green"></span> No servers needed</div>
+    <div class="badge"><span class="dot dot-red"></span> Live in minutes</div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <button class="nav-btn active" onclick="show(0)">📖 What &amp; Why</button>
+  <button class="nav-btn" onclick="show(1)">🛠 Setup</button>
+  <button class="nav-btn" onclick="show(2)">🚀 Deploy</button>
+  <button class="nav-btn" onclick="show(3)">✏️ Update</button>
+  <button class="nav-btn" onclick="show(4)">🍴 Others' Code</button>
+  <button class="nav-btn" onclick="show(5)">🤖 Claude + Folders</button>
+  <button class="nav-btn" onclick="show(6)">📋 Cheatsheet</button>
+</div>
+
+<div class="progress-bar">
+  <span id="progress-label">Step 1 of 7</span>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:14.3%"></div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- PART 1 -->
+  <div class="section active" id="sec-0">
+    <div class="section-header">
+      <div class="section-num">Part 01</div>
+      <h2>What are GitHub &amp; Vercel, and why do you need them?</h2>
+      <p>Before doing anything, let's understand what these tools actually are — in plain English.</p>
+    </div>
+    <div class="analogy">
+      <h4>The Kitchen Analogy</h4>
+      <p><strong>GitHub</strong> is your recipe notebook — it stores every version of your project, so you can always go back to an earlier draft. It lives in the cloud, so nothing is ever lost.<br><br><strong>Vercel</strong> is the restaurant that serves your food to the world. You hand it your recipe (from GitHub), and it automatically opens to customers 24/7. Every time you update your recipe, the restaurant immediately serves the new version.</p>
+    </div>
+    <div class="card-grid">
+      <div class="card"><h4>🗂 GitHub</h4><p>Stores all your files and their full history. If you break something, you can rewind. Think of it as Google Drive, but much smarter.</p></div>
+      <div class="card"><h4>⚡ Vercel</h4><p>Takes your files from GitHub and turns them into a live website — with a real URL anyone can visit, completely free.</p></div>
+      <div class="card"><h4>🔄 The Magic Link</h4><p>Connect them once. After that, every time you save a change to GitHub, your live website updates automatically.</p></div>
+      <div class="card"><h4>💰 The Cost</h4><p>Both are free for personal projects. You can host a full website with a real URL, paying nothing.</p></div>
+    </div>
+    <div class="flow">
+      <div class="flow-node">You edit files</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node accent">GitHub saves them</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node green">Vercel goes live</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node">World sees it ✓</div>
+    </div>
+    <div class="callout"><strong>Bottom line:</strong> GitHub is your safety net and storage. Vercel is your publisher. Together they replace needing a server, manual file uploads, or any DevOps knowledge.</div>
+    <button class="mock-btn" onclick="show(1)">Next: Set everything up →</button>
+  </div>
+
+  <!-- PART 2 -->
+  <div class="section" id="sec-1">
+    <div class="section-header">
+      <div class="section-num">Part 02</div>
+      <h2>Setting Up Your Accounts</h2>
+      <p>You only do this once. It takes about 5 minutes total.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Create a GitHub account</h3>
+        <p>Go to <strong style="color:var(--accent)">github.com</strong> and sign up with your email. Choose a username — it will appear in your project URLs, so pick something sensible.</p>
+        <div class="callout">Your username becomes part of your address: <strong>github.com/your-username</strong></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Create your first Repository</h3>
+        <p>A <strong>repository (repo)</strong> is just a project folder on GitHub. One project = one repo.</p>
+        <div class="visual-box">
+          <div class="label">On GitHub</div>
+          Click <span class="hl">+ New Repository</span><br>
+          Name it: <span class="hl-p">my-website</span><br>
+          Select: <span class="hl">Public</span> (so Vercel can read it)<br>
+          Tick: <span class="hl">Add a README file</span><br>
+          Click: <span class="hl-r">Create Repository</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Upload your project files</h3>
+        <p>No software needed. GitHub lets you drag-and-drop files right in the browser.</p>
+        <div class="visual-box">
+          <div class="label">In your new repo</div>
+          Click <span class="hl">Add file</span> → <span class="hl">Upload files</span><br>
+          Drag your HTML, CSS, images into the box<br>
+          Type a message: <span class="hl-p">"First upload"</span><br>
+          Click: <span class="hl">Commit changes</span>
+        </div>
+        <div class="callout warn"><strong>What's a "Commit"?</strong> It's saving with a label. Every save is tracked — so you can always see what changed, and when, and revert if needed.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num green">4</div>
+      <div class="step-body">
+        <h3>Create a Vercel account</h3>
+        <p>Go to <strong style="color:var(--accent2)">vercel.com</strong> and click <strong>"Continue with GitHub"</strong>. That's it — Vercel and GitHub are now connected. One click, no separate password needed.</p>
+      </div>
+    </div>
+    <button class="mock-btn" onclick="show(2)">Next: Deploy your site →</button>
+  </div>
+
+  <!-- PART 3 -->
+  <div class="section" id="sec-2">
+    <div class="section-header">
+      <div class="section-num">Part 03</div>
+      <h2>Deploying Your Website</h2>
+      <p>This is the step where your files become a real, live website with a URL you can share.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Import your project into Vercel</h3>
+        <div class="visual-box">
+          <div class="label">On vercel.com</div>
+          Click <span class="hl">Add New Project</span><br>
+          Click <span class="hl">Import Git Repository</span><br>
+          Your GitHub repo appears in the list → click <span class="hl-p">Import</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Configure (or just skip it)</h3>
+        <p>For a basic HTML/CSS site, change nothing. Just scroll down and click Deploy. Vercel auto-detects what kind of project you have.</p>
+        <div class="callout"><strong>Vercel is smart.</strong> It recognises plain HTML sites, React apps, Next.js — and adjusts its settings automatically.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num green">3</div>
+      <div class="step-body">
+        <h3>Watch it go live 🎉</h3>
+        <p>Within 10–30 seconds, your site is live. You'll get a free URL:</p>
+        <div class="visual-box">
+          <div class="label">Your live URL</div>
+          <span class="hl">https://</span><span class="hl-p">my-website</span><span class="hl-r">-abc123</span><span class="hl">.vercel.app</span>
+        </div>
+        <p style="margin-top:10px">You can also connect a custom domain like <em>myname.com</em> for free in Vercel settings.</p>
+      </div>
+    </div>
+    <div class="flow">
+      <div class="flow-node accent">GitHub repo</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node">Vercel builds it</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node green">Live URL ✓</div>
+    </div>
+    <button class="mock-btn" onclick="show(3)">Next: How to update your site →</button>
+  </div>
+
+  <!-- PART 4 -->
+  <div class="section" id="sec-3">
+    <div class="section-header">
+      <div class="section-num">Part 04</div>
+      <h2>Updating Your Website</h2>
+      <p>Once it's set up, updating is the easiest part. Change a file, and your site updates. That's it.</p>
+    </div>
+    <div class="analogy">
+      <h4>The Magic Part</h4>
+      <p>GitHub and Vercel watch each other. The moment you save (commit) a change to GitHub, Vercel automatically rebuilds and publishes your site. No clicking "upload". No FTP. No server access. It just happens.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Edit a file directly on GitHub</h3>
+        <div class="visual-box">
+          <div class="label">Browser method — no software needed</div>
+          Open your repo on github.com<br>
+          Click the file you want to edit (e.g. <span class="hl-p">index.html</span>)<br>
+          Click the <span class="hl">✏️ pencil icon</span> (top right)<br>
+          Make your changes<br>
+          Add a short note: <span class="hl-p">"Fixed the headline text"</span><br>
+          Click <span class="hl">Commit changes</span>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num green">2</div>
+      <div class="step-body">
+        <h3>Vercel rebuilds automatically</h3>
+        <p>Go to your Vercel dashboard. You'll see a new deployment starting within seconds. Within a minute, your live site reflects the change.</p>
+        <div class="callout"><strong>Preview URLs:</strong> Every commit also creates a temporary preview link so you can check changes before they go fully live — great for catching mistakes first.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num red">3</div>
+      <div class="step-body">
+        <h3>Made a mistake? Roll back instantly.</h3>
+        <p>In your Vercel dashboard, every previous deployment is listed. Click any older version and hit <strong>"Promote to Production"</strong> — your site reverts immediately. No panic required.</p>
+      </div>
+    </div>
+    <button class="mock-btn" onclick="show(4)">Next: Using other people's code →</button>
+  </div>
+
+  <!-- PART 5 -->
+  <div class="section" id="sec-4">
+    <div class="section-header">
+      <div class="section-num">Part 05</div>
+      <h2>Using Other People's Code from GitHub</h2>
+      <p>One of GitHub's superpowers: millions of free, open-source projects you can copy, customise, and deploy as your own.</p>
+    </div>
+    <div class="analogy">
+      <h4>What is "Forking"?</h4>
+      <p>When you <strong>Fork</strong> someone's GitHub project, you make your own personal copy of it — in your own account. You can edit it however you want without affecting the original. It's like photocopying a recipe and putting your own twist on it.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Find a project you like</h3>
+        <p>Browse <strong style="color:var(--accent)">github.com/explore</strong> or search for what you need. Look for repos with many ⭐ stars — that indicates popularity and quality.</p>
+        <div class="callout">Example: want a portfolio template? Search <strong>"portfolio template HTML"</strong> on GitHub and you'll find hundreds of free options ready to customise.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Fork it to your account</h3>
+        <div class="fork-ui">
+          <div class="fork-ui-bar">
+            <span style="color:var(--accent)">someone-else / cool-portfolio-template</span>
+            <span style="flex:1"></span>
+            <span style="background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);color:var(--accent);font-size:12px;font-weight:600;padding:5px 14px;border-radius:6px">⑂ Fork</span>
+          </div>
+          <div class="fork-ui-body">
+            <div class="fork-row"><span>⭐ 2,400 stars</span><span>🍴 843 forks</span><span>👀 Public</span></div>
+            <div class="fork-row"><span style="color:var(--accent)">index.html</span><span style="color:var(--accent2)">style.css</span><span>README.md</span></div>
+          </div>
+        </div>
+        <p>Click the <strong>Fork</strong> button at the top right of any repo. GitHub creates a copy under your account: <span style="color:var(--accent2)">your-username/cool-portfolio-template</span></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num green">3</div>
+      <div class="step-body">
+        <h3>Customise it</h3>
+        <p>Edit any files in your forked copy — change text, colours, images, whatever. The original stays untouched. Only your copy changes.</p>
+        <div class="callout warn"><strong>Always check the licence first.</strong> Look for a file called <strong>LICENSE</strong> in the repo. MIT or Apache licences mean use freely. Keep any required attribution credit in place.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num red">4</div>
+      <div class="step-body">
+        <h3>Deploy it on Vercel</h3>
+        <p>Since the fork is now in your GitHub account, go to Vercel → Add New Project → import your forked repo. It deploys exactly like your own project. Live in under a minute.</p>
+      </div>
+    </div>
+    <div class="card-grid" style="margin-top:8px">
+      <div class="card"><h4>🔍 Where to find good repos</h4><p>github.com/explore, github.com/topics, or Google "awesome [topic] github" for curated lists.</p></div>
+      <div class="card"><h4>⭐ What to look for</h4><p>Many stars, recent commits (updated recently), and a README with clear instructions.</p></div>
+    </div>
+    <button class="mock-btn" onclick="show(5)">Next: Working with Claude →</button>
+  </div>
+
+  <!-- PART 6: CLAUDE + FOLDERS -->
+  <div class="section" id="sec-5">
+    <div class="section-header">
+      <div class="section-num">Part 06</div>
+      <h2>Working with Claude + Folders</h2>
+      <p>How to use Claude to build things, keep your project organised, and get your code into GitHub and live — without writing a single line yourself.</p>
+    </div>
+
+    <div class="analogy">
+      <h4>The New Way to Build</h4>
+      <p>You describe what you want to Claude. Claude writes the code. You paste it into the right folder. GitHub stores it. Vercel publishes it. You made every decision — Claude just handled the technical part.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Set up your folder structure before asking Claude anything</h3>
+        <p>A clean folder layout matters. Vercel expects your homepage at the top level, and Claude writes much better code when it knows exactly where each file lives.</p>
+        <div class="visual-box">
+          <div class="label">Standard folder structure</div>
+          <span class="hl-p">my-website/</span>  ← root (top level of your repo)<br>
+          &nbsp;&nbsp;<span class="hl">index.html</span>  &nbsp;&nbsp;← homepage — must be here<br>
+          &nbsp;&nbsp;<span class="hl">about.html</span>  &nbsp;&nbsp;← other pages<br>
+          &nbsp;&nbsp;<span class="hl-p">css/</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">style.css</span>  &nbsp;&nbsp;&nbsp;← all styling in here<br>
+          &nbsp;&nbsp;<span class="hl-p">js/</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">script.js</span>  &nbsp;&nbsp;&nbsp;← any interactions<br>
+          &nbsp;&nbsp;<span class="hl-p">images/</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl">logo.png</span>  &nbsp;&nbsp;&nbsp;&nbsp;← your images<br>
+          &nbsp;&nbsp;<span class="hl-r">README.md</span>  &nbsp;&nbsp;&nbsp;← describe your project
+        </div>
+        <div class="callout warn"><strong>Critical:</strong> <strong>index.html</strong> must sit at the root (top level) of your repo — not inside any subfolder. Vercel uses it as the entry point. If it's buried, your site won't load.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Ask Claude the right way</h3>
+        <p>Vague requests produce generic code. Specific requests produce code that plugs straight into your structure.</p>
+        <div class="compare">
+          <div class="visual-box prose" style="border-color:rgba(255,107,107,0.3)">
+            <div class="label label-bad">❌ Too vague</div>
+            <span class="hl-r">"Make me a contact form"</span>
+          </div>
+          <div class="visual-box prose" style="border-color:rgba(0,212,170,0.3)">
+            <div class="label label-good">✅ Specific</div>
+            <span class="hl">"Write a contact form for <strong>index.html</strong>. Styles in <strong>css/style.css</strong>. Fields: name, email, message. Dark background, white text, minimal."</span>
+          </div>
+        </div>
+        <div class="callout">Always tell Claude: the <strong>filename</strong>, where it lives, which other files it connects to, and the visual style. Claude will write code that fits your exact setup.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">3</div>
+      <div class="step-body">
+        <h3>Use Claude Projects to keep context across sessions</h3>
+        <p>Claude's <strong>Projects</strong> feature is a persistent workspace — Claude remembers your setup between conversations. Essential when you're building something over multiple sessions.</p>
+        <div class="visual-box prose">
+          <div class="label">Setting up a Claude Project</div>
+          1. In Claude → click <span class="hl-p">Projects</span> in the left sidebar<br>
+          2. Create a new project, name it after your site<br>
+          3. Open <span class="hl">Project Instructions</span> and paste something like:<br><br>
+          <span class="hl" style="font-style:italic">"I'm building a website called [name]. Main file is index.html at the root. CSS in css/style.css. JS in js/script.js. It's a [e.g. portfolio for a photographer, dark theme, minimal style]. Always write code that fits this structure."</span><br><br>
+          4. Every conversation in this Project now starts with Claude already knowing your setup.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num green">4</div>
+      <div class="step-body">
+        <h3>Copy Claude's code into the right file on GitHub</h3>
+        <p>Claude tells you which file the code belongs to. Navigate to that file in your repo and paste it in — that's the whole workflow.</p>
+        <div class="visual-box prose">
+          <div class="label">Step by step</div>
+          Claude writes code → says it goes in <span class="hl-p">css/style.css</span><br>
+          → Open your GitHub repo<br>
+          → Navigate to <span class="hl-p">css/</span> → click <span class="hl-p">style.css</span><br>
+          → Click the ✏️ pencil icon to edit<br>
+          → Select all → paste Claude's code<br>
+          → Write a commit message: <span class="hl">"Updated styles from Claude"</span><br>
+          → Click <span class="hl">Commit changes</span><br>
+          → Vercel rebuilds → live in ~30 seconds
+        </div>
+        <div class="callout"><strong>One file at a time.</strong> If Claude gives you HTML and CSS in the same reply, paste each piece into its own file separately. Mixing them together causes problems later.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num red">5</div>
+      <div class="step-body">
+        <h3>When something breaks — give Claude the full picture</h3>
+        <p>Claude can fix its own mistakes, but only if you paste in the relevant code and describe exactly what's happening versus what you expected.</p>
+        <div class="compare">
+          <div class="visual-box prose" style="border-color:rgba(255,107,107,0.3)">
+            <div class="label label-bad">❌ Not helpful</div>
+            <span class="hl-r">"The site is broken, fix it"</span>
+          </div>
+          <div class="visual-box prose" style="border-color:rgba(0,212,170,0.3)">
+            <div class="label label-good">✅ Helpful</div>
+            <span class="hl">"The navbar disappears on mobile. Here's my css/style.css: [paste]. Here's index.html: [paste]. Desktop looks fine. On my phone the menu isn't visible."</span>
+          </div>
+        </div>
+        <div class="callout"><strong>Golden rule:</strong> Claude can't see your files — you have to bring them into the conversation. The more context you show, the faster it fixes.</div>
+      </div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card"><h4>📁 One task = one file</h4><p>Ask Claude for one file at a time. Focused requests produce cleaner code than asking for a whole site in one go.</p></div>
+      <div class="card"><h4>🏷 No spaces in filenames</h4><p>Use lowercase with hyphens: <strong>about.html</strong> not <strong>About Page.html</strong>. Spaces cause subtle bugs that are annoying to track down.</p></div>
+      <div class="card"><h4>💬 Start with context</h4><p>At the start of any task, briefly say: "I'm building a portfolio, dark theme, file structure we set up." Even in a Project, a quick recap helps Claude stay accurate.</p></div>
+      <div class="card"><h4>🔁 Iterate, don't restart</h4><p>If Claude's output is 80% right, paste it back and say "fix just the mobile menu." Small corrections beat starting over every time.</p></div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-node">Tell Claude what to build</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node accent">Paste into correct file on GitHub</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node">Commit</div>
+      <div class="flow-arr">→</div>
+      <div class="flow-node green">Live on Vercel ✓</div>
+    </div>
+
+    <button class="mock-btn" onclick="show(6)">Final: Quick cheatsheet →</button>
+  </div>
+
+  <!-- PART 7: CHEATSHEET -->
+  <div class="section" id="sec-6">
+    <div class="section-header">
+      <div class="section-num">Part 07</div>
+      <h2>Quick Reference Cheatsheet</h2>
+      <p>Everything on one page. Bookmark this tab.</p>
+    </div>
+    <div class="step">
+      <div class="step-num emoji">📖</div>
+      <div class="step-body">
+        <h3>Key Terms in Plain English</h3>
+        <div class="visual-box prose">
+          <div class="label">Glossary</div>
+          <strong style="color:#fff">Repository (Repo)</strong> — A project folder on GitHub<br>
+          <strong style="color:#fff">Commit</strong> — Saving a version of your files with a short label<br>
+          <strong style="color:#fff">Fork</strong> — Copying someone else's project into your account<br>
+          <strong style="color:#fff">Deploy</strong> — Publishing your site so it's live on the internet<br>
+          <strong style="color:#fff">Root</strong> — The top level of your repo (where index.html must live)<br>
+          <strong style="color:#fff">Branch</strong> — A parallel version of your project for testing changes<br>
+          <strong style="color:#fff">Main</strong> — The official, live version of your project<br>
+          <strong style="color:#fff">README</strong> — A description/instructions file shown on GitHub<br>
+          <strong style="color:#fff">Preview URL</strong> — A test link Vercel creates for every commit<br>
+          <strong style="color:#fff">Claude Project</strong> — A persistent workspace where Claude remembers your setup
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num emoji">🔄</div>
+      <div class="step-body">
+        <h3>The Full Workflow (Every Time)</h3>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+          <div style="display:flex;align-items:center;gap:12px"><div class="flow-node" style="min-width:34px;text-align:center;padding:8px">1</div><span style="font-size:14px;color:var(--muted)">Ask Claude for a specific file ("write me css/style.css")</span></div>
+          <div style="display:flex;align-items:center;gap:12px"><div class="flow-node" style="min-width:34px;text-align:center;padding:8px">2</div><span style="font-size:14px;color:var(--muted)">Paste it into the correct file in your GitHub repo</span></div>
+          <div style="display:flex;align-items:center;gap:12px"><div class="flow-node" style="min-width:34px;text-align:center;padding:8px">3</div><span style="font-size:14px;color:var(--muted)">Commit with a short descriptive message</span></div>
+          <div style="display:flex;align-items:center;gap:12px"><div class="flow-node accent" style="min-width:34px;text-align:center;padding:8px">4</div><span style="font-size:14px;color:var(--muted)">Vercel detects the commit and rebuilds automatically</span></div>
+          <div style="display:flex;align-items:center;gap:12px"><div class="flow-node green" style="min-width:34px;text-align:center;padding:8px">5</div><span style="font-size:14px;color:var(--muted)">Check the preview URL — if good, it's already live</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num emoji">💡</div>
+      <div class="step-body">
+        <h3>Pro Tips</h3>
+        <div class="callout">Write <strong>clear commit messages</strong>. "Changed homepage headline to new brand copy" beats "update" every time. Future you will thank present you.</div>
+        <div class="callout">Use <strong>Vercel preview URLs</strong> to test changes before the world sees them. Share with clients for feedback before going live.</div>
+        <div class="callout">Set up a <strong>Claude Project</strong> with your file structure once in the instructions — then every session starts with Claude already knowing your setup.</div>
+        <div class="callout warn">Before using a forked project commercially, <strong>check the LICENSE file</strong>. MIT or Apache = use freely. Takes 10 seconds and avoids headaches.</div>
+      </div>
+    </div>
+    <div class="finish-box">
+      <div style="font-size:36px;margin-bottom:12px">🎉</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:10px">You're ready to build.</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.8;max-width:460px;margin:0 auto">Claude writes the code. GitHub saves your work. Vercel publishes it. The world's open-source projects are yours to fork. No servers. No headaches. No limits.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const sections = document.querySelectorAll('.section');
+  const navBtns = document.querySelectorAll('.nav-btn');
+  const progressFill = document.getElementById('progress-fill');
+  const progressLabel = document.getElementById('progress-label');
+  const total = sections.length;
+
+  function show(i) {
+    sections.forEach(s => s.classList.remove('active'));
+    navBtns.forEach(b => b.classList.remove('active'));
+    sections[i].classList.add('active');
+    navBtns[i].classList.add('active');
+    const pct = ((i + 1) / total * 100).toFixed(1);
+    progressFill.style.width = pct + '%';
+    progressLabel.textContent = 'Step ' + (i + 1) + ' of ' + total;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
